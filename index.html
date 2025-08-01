@@ -304,20 +304,38 @@
                 
                 // Add markers for photo locations
                 allPhotos.forEach(photo => {
-                    if (photo.coordinates) {
-                        L.marker([photo.coordinates.lat, photo.coordinates.lng])
-                            .addTo(map)
-                            .bindPopup(`<strong>${photo.title}</strong><br>${photo.location}`);
+                    // Check for both coordinate formats
+                    if ((photo.lat && photo.lng) || (photo.coordinates)) {
+                        let lat, lng;
+                        
+                        if (photo.lat && photo.lng) {
+                            // Direct lat/lng properties
+                            lat = photo.lat;
+                            lng = photo.lng;
+                        } else if (photo.coordinates) {
+                            // Nested coordinates object
+                            lat = photo.coordinates.lat;
+                            lng = photo.coordinates.lng;
+                        }
+                        
+                        if (lat && lng) {
+                            L.marker([lat, lng])
+                                .addTo(map)
+                                .bindPopup(`<strong>${photo.title}</strong><br>${photo.location}`);
+                            
+                            console.log(`Added marker for ${photo.title} at ${lat}, ${lng}`);
+                        }
+                    } else {
+                        console.log(`No coordinates found for ${photo.title}`);
                     }
                 });
                 
-                console.log("Map initialized successfully");
+                console.log("Map initialized successfully with", allPhotos.length, "photos");
                 
             } catch (error) {
                 console.error("Map initialization error:", error);
             }
         }
-
         // Event listeners
         document.addEventListener('DOMContentLoaded', () => {
             // Mobile menu toggle
