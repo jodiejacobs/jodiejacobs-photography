@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "title": "Getting Started",
+    "category": "faces",
+    "thumbnail": "https://via.placeholder.com/400x300/f3f4f6/9ca3af?text=Upload+Your+Photos",
+    "full": "https://via.placeholder.com/800x600/f3f4f6/9ca3af?text=Upload+Your+Photos",
+    "lat": null,
+    "lng": null,
+    "location": "Ready for your photos",
+    "date": "2025-01-01",
+    "filename": "placeholder.jpg"
+  }
+]
