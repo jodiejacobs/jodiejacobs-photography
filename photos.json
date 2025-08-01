@@ -34,17 +34,5 @@
     "location": "Muir Woods, CA",
     "date": "2024-12-08",
     "filename": "nature1.jpg"
-  },
-  {
-    "id": 4,
-    "title": "Dolores Park Portrait",
-    "category": "faces",
-    "thumbnail": "https://via.placeholder.com/400x300/fef3c7/d97706?text=Portrait+2",
-    "full": "https://via.placeholder.com/800x600/fef3c7/d97706?text=Portrait+2",
-    "lat": 37.7596,
-    "lng": -122.4269,
-    "location": "Dolores Park, SF",
-    "date": "2024-12-05",
-    "filename": "portrait2.jpg"
   }
 ]

@@ -10,7 +10,7 @@ A minimalistic photography portfolio featuring faces, street, and nature photogr
 - 1000+ photo support with lazy loading
 
 ## Live Site
-Visit: [jodiejacobs.xyz](https://jodiejacobs.xyz)
+Visit: [jodiejacobs.com](https://jodiejacobs.com)
 
 ## Development
 ```bash
