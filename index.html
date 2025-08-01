@@ -323,17 +323,6 @@
                     zoom: 10
                 });
                 
-                // Add markers for photos with GPS data
-                allPhotos.forEach(photo => {
-                    if (photo.lat && photo.lng) {
-                        new mapboxgl.Marker({ color: "#374151" })
-                        .setLngLat([photo.lng, photo.lat])
-                        .setPopup(
-                            new mapboxgl.Popup({ offset: 25 })
-                            .setHTML("<div class="text-sm"><strong>" + photo.title + "</strong><br>" + photo.location + "</div>")
-                        )
-                        .addTo(map);
-                    }
                 });
             } catch (error) {
                 console.error("Map initialization error:", error);
@@ -341,9 +330,69 @@
         }
         
         // Call initializeMap after photos are loaded
-        setTimeout(initializeMap, 1000);
         
             loadPhotos();
+
+            // Clean Leaflet map initialization
+            function initMap() {
+                if (typeof L === "undefined") {
+                    console.error("Leaflet not loaded");
+                    return;
+                }
+                
+                try {
+                    const map = L.map("map").setView([37.7749, -122.4194], 11);
+                    
+                    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                        attribution: "© OpenStreetMap contributors"
+                    }).addTo(map);
+                    
+                    const markers = [
+                        { lat: 37.8199, lng: -122.4783, title: "Golden Gate Portrait", location: "Golden Gate Bridge" },
+                        { lat: 37.7599, lng: -122.4148, title: "Mission Street", location: "Mission District" },
+                        { lat: 37.8974, lng: -122.5808, title: "Nature Photo", location: "Muir Woods" }
+                    ];
+                    
+                    markers.forEach(function(marker) {
+                        L.marker([marker.lat, marker.lng])
+                            .addTo(map)
+                            .bindPopup("<strong>" + marker.title + "</strong><br>" + marker.location);
+                    });
+                    
+                    console.log("Map initialized successfully");
+                    
+                } catch (error) {
+                    console.error("Map error:", error);
+                }
+            }
+            
+            // Initialize map after a delay
+            setTimeout(initMap, 2000);
+            
+            // Initialize map after photos are loaded
+            setTimeout(() => {
+                initializeMap();
+            }, 1000);
+            
+            // Initialize map after photos are loaded
+            setTimeout(() => {
+                initializeMap();
+            }, 1000);
+            
+            // Initialize map after photos are loaded
+            setTimeout(() => {
+                initializeMap();
+            }, 1000);
+            
+            // Initialize map after photos are loaded
+            setTimeout(() => {
+                initializeMap();
+            }, 1000);
+            
+            // Initialize map after photos are loaded
+            setTimeout(() => {
+                initializeMap();
+            }, 1000);
             
             // Initialize map after photos are loaded
             setTimeout(() => {
@@ -426,34 +475,8 @@
             }, 1000);
 
 // Simple Leaflet map initialization
-function initLeafletMap() {
-    try {
-        const map = L.map("map").setView([37.7749, -122.4194], 11);
-        
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-            attribution: "© OpenStreetMap contributors"
-        }).addTo(map);
-        
-        const markers = [
-            { lat: 37.8199, lng: -122.4783, title: "Golden Gate Portrait", location: "Golden Gate Bridge" },
-            { lat: 37.7599, lng: -122.4148, title: "Mission Street", location: "Mission District" },
-            { lat: 37.8974, lng: -122.5808, title: "Nature Photo", location: "Muir Woods" }
-        ];
-        
-        markers.forEach(marker => {
-            L.marker([marker.lat, marker.lng])
-                .addTo(map)
-                .bindPopup(`<strong>${marker.title}</strong><br>${marker.location}`);
-        });
-        
-        console.log("Leaflet map initialized successfully");
-        
-    } catch (error) {
-        console.error("Map error:", error);
-    }
 }
 
-setTimeout(initLeafletMap, 1000);
             
             // Initialize map after photos are loaded
             setTimeout(() => {
