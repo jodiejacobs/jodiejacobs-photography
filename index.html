@@ -324,7 +324,7 @@
 
         // Initialize map when page loads
         function initializeMap() {
-            if (typeof mapboxgl === "undefined" || !CONFIG.mapboxToken || CONFIG.mapboxToken.includes("example")) {
+            if (typeof mapboxgl === "undefined" || !CONFIG.mapboxToken) {
                 document.getElementById("map").innerHTML = `
                     <div class="flex items-center justify-center h-full text-gray-500">
                         <div class="text-center">
@@ -339,7 +339,13 @@
             }
             
             try {
+                console.log("CONFIG.mapboxToken:", CONFIG.mapboxToken);
+                console.log("mapboxgl available:", typeof mapboxgl !== "undefined");
                 mapboxgl.accessToken = CONFIG.mapboxToken;
+                // Fallback: set token directly if CONFIG fails
+                if (!mapboxgl.accessToken) {
+                    mapboxgl.accessToken = "pk.eyJ1Ijoiam1qYWNvYnMiLCJhIjoiY21kdDlqdzRhMDU5MTJucTNreGgxbTdiNSJ9.kLIM9gpvIJ4yTScDBietxQ";
+                }
                 
                 const map = new mapboxgl.Map({
                     container: "map",
@@ -369,6 +375,31 @@
         setTimeout(initializeMap, 1000);
         
             loadPhotos();
+            
+            // Initialize map after photos are loaded
+            setTimeout(() => {
+                initializeMap();
+            }, 1000);
+            
+            // Initialize map after photos are loaded
+            setTimeout(() => {
+                initializeMap();
+            }, 1000);
+            
+            // Initialize map after photos are loaded
+            setTimeout(() => {
+                initializeMap();
+            }, 1000);
+            
+            // Initialize map after photos are loaded
+            setTimeout(() => {
+                initializeMap();
+            }, 1000);
+            
+            // Initialize map after photos are loaded
+            setTimeout(() => {
+                initializeMap();
+            }, 1000);
             
             // Initialize map after photos are loaded
             setTimeout(() => {
