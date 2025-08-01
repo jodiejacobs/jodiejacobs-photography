@@ -332,6 +332,11 @@
         // Call initializeMap after photos are loaded
         
             loadPhotos();
+            
+            // Initialize map after photos are loaded
+            setTimeout(() => {
+                initializeMap();
+            }, 1000);
 
             // Clean Leaflet map initialization
             function initMap() {
