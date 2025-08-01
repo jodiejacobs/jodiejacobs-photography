@@ -131,6 +131,23 @@
         </div>
     </section>
     
+    <!-- Map Section -->
+    <section id="map" class="py-16 px-6 bg-gray-50">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex justify-between items-start mb-12">
+                <div></div>
+                <div class="text-right">
+                    <h2 class="text-3xl font-light text-gray-900 mb-2">Photo Locations</h2>
+                    <p class="text-gray-600">Where these moments were captured</p>
+                </div>
+            </div>
+            
+            <div class="w-full h-96 bg-gray-200 rounded-lg overflow-hidden">
+                <div id="map" class="w-full h-full"></div>
+            </div>
+        </div>
+    </section>
+    
     <!-- Contact Section -->
     <section id="contact" class="py-16 px-6">
         <div class="max-w-7xl mx-auto">
@@ -305,6 +322,52 @@
                 });
             });
 
+        // Initialize map when page loads
+        function initializeMap() {
+            if (typeof mapboxgl === "undefined" || !CONFIG.mapboxToken || CONFIG.mapboxToken.includes("example")) {
+                document.getElementById("map").innerHTML = `
+                    <div class="flex items-center justify-center h-full text-gray-500">
+                        <div class="text-center">
+                            <svg class="w-12 h-12 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                            </svg>
+                            <p class="text-sm">Map requires Mapbox token</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            try {
+                mapboxgl.accessToken = CONFIG.mapboxToken;
+                
+                const map = new mapboxgl.Map({
+                    container: "map",
+                    style: "mapbox://styles/mapbox/light-v11",
+                    center: [-122.4194, 37.7749],
+                    zoom: 10
+                });
+                
+                // Add markers for photos with GPS data
+                allPhotos.forEach(photo => {
+                    if (photo.lat && photo.lng) {
+                        new mapboxgl.Marker({ color: "#374151" })
+                        .setLngLat([photo.lng, photo.lat])
+                        .setPopup(
+                            new mapboxgl.Popup({ offset: 25 })
+                            .setHTML(`<div class="text-sm"><strong>${photo.title}</strong><br>${photo.location}</div>`)
+                        )
+                        .addTo(map);
+                    }
+                });
+            } catch (error) {
+                console.error("Map initialization error:", error);
+            }
+        }
+        
+        // Call initializeMap after photos are loaded
+        setTimeout(initializeMap, 1000);
+        
             loadPhotos();
         });
     </script>
