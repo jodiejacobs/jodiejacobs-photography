@@ -163,24 +163,24 @@
     </footer>
 
     <!-- Lightbox Modal -->
-    <div id="lightbox" class="fixed inset-0 bg-black bg-opacity-90 z-50 hidden flex items-center justify-center p-4">
+    <div id="lightbox" class="fixed inset-0 bg-black bg-opacity-90 hidden flex items-center justify-center p-4" style="z-index: 9999;">
         <div class="relative max-w-7xl max-h-full w-full h-full flex items-center justify-center">
             <!-- Close button -->
-            <button id="lightbox-close" class="absolute top-4 right-4 z-60 text-white hover:text-gray-300 transition-colors">
+            <button id="lightbox-close" class="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors" style="z-index: 10000;">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </button>
             
             <!-- Previous button -->
-            <button id="lightbox-prev" class="absolute left-4 top-1/2 transform -translate-y-1/2 z-60 text-white hover:text-gray-300 transition-colors">
+            <button id="lightbox-prev" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 transition-colors" style="z-index: 10000;">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                 </svg>
             </button>
             
             <!-- Next button -->
-            <button id="lightbox-next" class="absolute right-4 top-1/2 transform -translate-y-1/2 z-60 text-white hover:text-gray-300 transition-colors">
+            <button id="lightbox-next" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 transition-colors" style="z-index: 10000;">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
@@ -279,6 +279,12 @@
                 this.currentIndex = photoIndex;
                 this.isOpen = true;
                 
+                // Hide the map container when lightbox opens
+                const mapSection = document.getElementById('map');
+                if (mapSection) {
+                    mapSection.style.display = 'none';
+                }
+                
                 // Show lightbox
                 this.lightbox.classList.remove('hidden');
                 document.body.style.overflow = 'hidden';
@@ -290,6 +296,12 @@
                 this.isOpen = false;
                 this.lightbox.classList.add('hidden');
                 document.body.style.overflow = '';
+                
+                // Show the map container again when lightbox closes
+                const mapSection = document.getElementById('map');
+                if (mapSection) {
+                    mapSection.style.display = 'block';
+                }
             }
             
             next() {
