@@ -51,23 +51,6 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <!-- <section id="home" class="pt-24 pb-16 px-6"> -->
-        <!-- <div class="max-w-7xl mx-auto"> -->
-            <!-- <div class="flex justify-between items-start"> -->
-                <!-- <div></div>
-                <div class="text-right max-w-lg">
-                    <h1 class="text-4xl md:text-5xl font-light text-gray-900 mb-4">
-                        Photography
-                    </h1>
-                    <p class="text-gray-600 text-lg font-light">
-                        Capturing moments through faces, streets, and nature
-                    </p>
-                </div>
-            </div>
-        </div> -->
-    <!-- </section> -->
-
     <!-- Portfolio Section -->
     <section id="portfolio" class="py-16 px-6">
         <div class="max-w-7xl mx-auto">
@@ -119,10 +102,10 @@
         <div class="max-w-7xl mx-auto">
             <div class="flex justify-between items-start mb-12">
                 <div></div>
-                <!-- <div class="text-right"> -->
+                <div class="text-right">
                     <!-- <h2 class="text-3xl font-light text-gray-900 mb-2">Photo Locations</h2> -->
                     <!-- <p class="text-gray-600">Where these moments were captured</p> -->
-                <!-- </div> -->
+                </div>
             </div>
             
             <div class="w-full h-96 bg-gray-200 rounded-lg overflow-hidden">
@@ -179,6 +162,52 @@
         </div>
     </footer>
 
+    <!-- Lightbox Modal -->
+    <div id="lightbox" class="fixed inset-0 bg-black bg-opacity-90 z-50 hidden flex items-center justify-center p-4">
+        <div class="relative max-w-7xl max-h-full w-full h-full flex items-center justify-center">
+            <!-- Close button -->
+            <button id="lightbox-close" class="absolute top-4 right-4 z-60 text-white hover:text-gray-300 transition-colors">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+            
+            <!-- Previous button -->
+            <button id="lightbox-prev" class="absolute left-4 top-1/2 transform -translate-y-1/2 z-60 text-white hover:text-gray-300 transition-colors">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+            </button>
+            
+            <!-- Next button -->
+            <button id="lightbox-next" class="absolute right-4 top-1/2 transform -translate-y-1/2 z-60 text-white hover:text-gray-300 transition-colors">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </button>
+            
+            <!-- Image container -->
+            <div class="relative w-full h-full flex items-center justify-center">
+                <img id="lightbox-image" 
+                     src="" 
+                     alt="" 
+                     class="max-w-full max-h-full object-contain">
+                
+                <!-- Loading spinner -->
+                <div id="lightbox-loading" class="absolute inset-0 flex items-center justify-center">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+                </div>
+            </div>
+            
+            <!-- Photo info -->
+            <div class="absolute bottom-4 left-4 right-4 text-center text-white">
+                <h3 id="lightbox-title" class="text-lg font-medium mb-1"></h3>
+                <p id="lightbox-info" class="text-sm text-gray-300"></p>
+                <p id="lightbox-counter" class="text-xs text-gray-400 mt-2"></p>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Configuration
         const CONFIG = {
@@ -192,7 +221,120 @@
         const photosPerPage = 24;
         let map = null;
 
+        // Lightbox functionality
+        class PhotoLightbox {
+            constructor() {
+                this.currentIndex = 0;
+                this.photos = [];
+                this.isOpen = false;
+                
+                this.lightbox = document.getElementById('lightbox');
+                this.image = document.getElementById('lightbox-image');
+                this.title = document.getElementById('lightbox-title');
+                this.info = document.getElementById('lightbox-info');
+                this.counter = document.getElementById('lightbox-counter');
+                this.loading = document.getElementById('lightbox-loading');
+                
+                this.initEventListeners();
+            }
+            
+            initEventListeners() {
+                // Close lightbox
+                document.getElementById('lightbox-close').addEventListener('click', () => this.close());
+                
+                // Navigation
+                document.getElementById('lightbox-prev').addEventListener('click', () => this.prev());
+                document.getElementById('lightbox-next').addEventListener('click', () => this.next());
+                
+                // Click outside image to close
+                this.lightbox.addEventListener('click', (e) => {
+                    if (e.target === this.lightbox) {
+                        this.close();
+                    }
+                });
+                
+                // Keyboard navigation
+                document.addEventListener('keydown', (e) => {
+                    if (!this.isOpen) return;
+                    
+                    switch(e.key) {
+                        case 'Escape':
+                            this.close();
+                            break;
+                        case 'ArrowLeft':
+                            this.prev();
+                            break;
+                        case 'ArrowRight':
+                            this.next();
+                            break;
+                    }
+                });
+                
+                // Prevent scrolling when lightbox is open
+                this.lightbox.addEventListener('wheel', (e) => e.preventDefault());
+            }
+            
+            open(photoIndex, photos = displayedPhotos) {
+                this.photos = photos;
+                this.currentIndex = photoIndex;
+                this.isOpen = true;
+                
+                // Show lightbox
+                this.lightbox.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+                
+                this.showPhoto();
+            }
+            
+            close() {
+                this.isOpen = false;
+                this.lightbox.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+            
+            next() {
+                this.currentIndex = (this.currentIndex + 1) % this.photos.length;
+                this.showPhoto();
+            }
+            
+            prev() {
+                this.currentIndex = (this.currentIndex - 1 + this.photos.length) % this.photos.length;
+                this.showPhoto();
+            }
+            
+            showPhoto() {
+                const photo = this.photos[this.currentIndex];
+                
+                // Show loading
+                this.loading.classList.remove('hidden');
+                this.image.style.opacity = '0';
+                
+                // Update info
+                this.title.textContent = photo.title;
+                this.info.textContent = `${photo.location} • ${photo.date}`;
+                this.counter.textContent = `${this.currentIndex + 1} of ${this.photos.length}`;
+                
+                // Load image
+                const img = new Image();
+                img.onload = () => {
+                    this.image.src = photo.full;
+                    this.image.alt = photo.title;
+                    this.loading.classList.add('hidden');
+                    this.image.style.opacity = '1';
+                };
+                img.onerror = () => {
+                    // Fallback to thumbnail if full image fails
+                    this.image.src = photo.thumbnail;
+                    this.image.alt = photo.title;
+                    this.loading.classList.add('hidden');
+                    this.image.style.opacity = '1';
+                };
+                img.src = photo.full;
+            }
+        }
 
+        // Initialize lightbox
+        const lightbox = new PhotoLightbox();
 
         // Load photos from JSON
         async function loadPhotos() {
@@ -231,8 +373,9 @@
             const endIndex = startIndex + photosPerPage;
             const photosToShow = displayedPhotos.slice(startIndex, endIndex);
             
-            photosToShow.forEach(photo => {
-                const photoElement = createPhotoElement(photo);
+            photosToShow.forEach((photo, i) => {
+                const globalIndex = startIndex + i;
+                const photoElement = createPhotoElement(photo, globalIndex);
                 grid.appendChild(photoElement);
             });
             
@@ -246,10 +389,11 @@
         }
 
         // Create photo element
-        function createPhotoElement(photo) {
+        function createPhotoElement(photo, index) {
             const div = document.createElement('div');
             div.className = 'photo-item opacity-0 transition-opacity duration-500';
             div.dataset.category = photo.category;
+            div.dataset.index = index;
             
             div.innerHTML = `
                 <div class="aspect-[3/4] bg-gray-100 rounded-sm overflow-hidden cursor-pointer group">
@@ -263,6 +407,13 @@
                     <p class="text-xs text-gray-600">${photo.location} • ${photo.date}</p>
                 </div>
             `;
+            
+            // Add click handler to open lightbox
+            div.addEventListener('click', () => {
+                // Find the index in currently displayed photos
+                const displayIndex = displayedPhotos.findIndex(p => p.id === photo.id);
+                lightbox.open(displayIndex, displayedPhotos);
+            });
             
             setTimeout(() => {
                 div.classList.remove('opacity-0');
@@ -336,6 +487,7 @@
                 console.error("Map initialization error:", error);
             }
         }
+
         // Event listeners
         document.addEventListener('DOMContentLoaded', () => {
             // Mobile menu toggle
