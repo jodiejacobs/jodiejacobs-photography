@@ -3,36 +3,12 @@
     "id": 1,
     "title": "Golden Gate Portrait",
     "category": "faces",
-    "thumbnail": "https://via.placeholder.com/400x300/f3f4f6/9ca3af?text=Portrait+Sample",
-    "full": "https://via.placeholder.com/800x600/f3f4f6/9ca3af?text=Portrait+Sample",
+    "thumbnail": "https://cdn.kqed.org/wp-content/uploads/sites/10/2023/05/GettyImages-601441689-1020x574.jpg",
+    "full": "https://cdn.kqed.org/wp-content/uploads/sites/10/2023/05/GettyImages-601441689-1020x574.jpg",
     "lat": 37.8199,
     "lng": -122.4783,
     "location": "Golden Gate Bridge, SF",
     "date": "2024-12-15",
     "filename": "portrait1.jpg"
-  },
-  {
-    "id": 2,
-    "title": "Mission District Street",
-    "category": "street",
-    "thumbnail": "https://via.placeholder.com/400x300/e5e7eb/6b7280?text=Street+Sample",
-    "full": "https://via.placeholder.com/800x600/e5e7eb/6b7280?text=Street+Sample",
-    "lat": 37.7599,
-    "lng": -122.4148,
-    "location": "Mission District, SF",
-    "date": "2024-12-10",
-    "filename": "street1.jpg"
-  },
-  {
-    "id": 3,
-    "title": "Muir Woods Nature",
-    "category": "nature",
-    "thumbnail": "https://via.placeholder.com/400x300/d1fae5/059669?text=Nature+Sample",
-    "full": "https://via.placeholder.com/800x600/d1fae5/059669?text=Nature+Sample",
-    "lat": 37.8974,
-    "lng": -122.5808,
-    "location": "Muir Woods, CA",
-    "date": "2024-12-08",
-    "filename": "nature1.jpg"
   }
 ]
