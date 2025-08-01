@@ -126,7 +126,7 @@
             </div>
             
             <div class="w-full h-96 bg-gray-200 rounded-lg overflow-hidden">
-                <div id="map" class="w-full h-full"></div>
+                <div id="map-container" class="w-full h-full"></div>
             </div>
         </div>
     </section>
@@ -141,7 +141,7 @@
                     
                     <div class="space-y-6">
                         <div>
-                            <a href="mailto:jodie@jodiejacobs.com" 
+                            <a href="mailto:jacobs.jodiem@gmail.com" 
                                class="text-gray-600 hover:text-gray-900 transition-colors">
                                 jacobs.jodiem@gmail.com
                             </a>
@@ -158,7 +158,7 @@
                             <p class="text-sm text-gray-500 mb-4">
                                 Available for commissions and collaborations
                             </p>
-                            <a href="mailto:jodie@jodiejacobs.com?subject=Photography Inquiry" 
+                            <a href="mailto:jacobs.jodiem@gmail.com?subject=Photography Inquiry" 
                                class="inline-block bg-gray-900 text-white px-6 py-2 text-sm rounded-full hover:bg-gray-800 transition-colors">
                                 Get in Touch
                             </a>
@@ -180,11 +180,9 @@
     </footer>
 
     <script>
-        // Configuration - Update these with your NextCloud details
+        // Configuration
         const CONFIG = {
-            nextcloudBaseUrl: 'https://your-nextcloud-domain.com/s/',
-            photosJsonUrl: './photos.json',
-            mapboxToken: 'pk.eyJ1Ijoiam1qYWNvYnMiLCJhIjoiY21kdDlqdzRhMDU5MTJucTNreGgxbTdiNSJ9.kLIM9gpvIJ4yTScDBietxQ'
+            photosJsonUrl: './photos.json'
         };
 
         // Global variables
@@ -192,26 +190,87 @@
         let displayedPhotos = [];
         let currentPage = 0;
         const photosPerPage = 24;
+        let map = null;
 
-        // Load photos from JSON
+        // Sample photos for demo (remove when using real photos.json)
+        const samplePhotos = [
+            {
+                id: 1,
+                title: "Golden Hour Portrait",
+                category: "faces",
+                location: "Golden Gate Bridge",
+                date: "2024-12-15",
+                thumbnail: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=600&fit=crop",
+                coordinates: { lat: 37.8199, lng: -122.4783 }
+            },
+            {
+                id: 2,
+                title: "Street Market",
+                category: "street",
+                location: "Mission District",
+                date: "2024-12-10",
+                thumbnail: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=600&fit=crop",
+                coordinates: { lat: 37.7599, lng: -122.4148 }
+            },
+            {
+                id: 3,
+                title: "Redwood Giants",
+                category: "nature",
+                location: "Muir Woods",
+                date: "2024-12-08",
+                thumbnail: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=600&fit=crop",
+                coordinates: { lat: 37.8974, lng: -122.5808 }
+            },
+            {
+                id: 4,
+                title: "Evening Light",
+                category: "faces",
+                location: "Dolores Park",
+                date: "2024-12-05",
+                thumbnail: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=600&fit=crop",
+                coordinates: { lat: 37.7596, lng: -122.4269 }
+            },
+            {
+                id: 5,
+                title: "City Rhythm",
+                category: "street",
+                location: "Union Square",
+                date: "2024-12-03",
+                thumbnail: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=600&fit=crop",
+                coordinates: { lat: 37.7880, lng: -122.4074 }
+            },
+            {
+                id: 6,
+                title: "Ocean Mist",
+                category: "nature",
+                location: "Baker Beach",
+                date: "2024-12-01",
+                thumbnail: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=600&fit=crop",
+                coordinates: { lat: 37.7937, lng: -122.4844 }
+            }
+        ];
+
+        // Load photos from JSON or use sample data
         async function loadPhotos() {
             try {
                 const response = await fetch(CONFIG.photosJsonUrl);
-                allPhotos = await response.json();
-                displayedPhotos = [...allPhotos];
-                
-                document.getElementById('loading').classList.add('hidden');
-                document.getElementById('photo-grid').classList.remove('hidden');
-                
-                loadMorePhotos();
+                if (response.ok) {
+                    allPhotos = await response.json();
+                } else {
+                    throw new Error('Photos JSON not found');
+                }
             } catch (error) {
-                console.error('Error loading photos:', error);
-                document.getElementById('loading').innerHTML = `
-                    <div class="text-center py-8 text-gray-500">
-                        <p>Ready for your photos! Upload photos.json to get started.</p>
-                    </div>
-                `;
+                console.log('Using sample photos for demo');
+                allPhotos = samplePhotos;
             }
+            
+            displayedPhotos = [...allPhotos];
+            
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('photo-grid').classList.remove('hidden');
+            
+            loadMorePhotos();
+            initializeMap();
         }
 
         // Load more photos (pagination)
@@ -263,6 +322,53 @@
             return div;
         }
 
+        // Filter photos by category
+        function filterPhotos(category) {
+            const grid = document.getElementById('photo-grid');
+            grid.innerHTML = '';
+            currentPage = 0;
+            
+            if (category === 'all') {
+                displayedPhotos = [...allPhotos];
+            } else {
+                displayedPhotos = allPhotos.filter(photo => photo.category === category);
+            }
+            
+            loadMorePhotos();
+        }
+
+        // Initialize Leaflet map
+        function initializeMap() {
+            if (typeof L === "undefined") {
+                console.error("Leaflet not loaded");
+                return;
+            }
+            
+            try {
+                // Initialize map centered on San Francisco
+                map = L.map("map-container").setView([37.7749, -122.4194], 11);
+                
+                // Add OpenStreetMap tiles
+                L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                    attribution: "© OpenStreetMap contributors"
+                }).addTo(map);
+                
+                // Add markers for photo locations
+                allPhotos.forEach(photo => {
+                    if (photo.coordinates) {
+                        L.marker([photo.coordinates.lat, photo.coordinates.lng])
+                            .addTo(map)
+                            .bindPopup(`<strong>${photo.title}</strong><br>${photo.location}`);
+                    }
+                });
+                
+                console.log("Map initialized successfully");
+                
+            } catch (error) {
+                console.error("Map initialization error:", error);
+            }
+        }
+
         // Event listeners
         document.addEventListener('DOMContentLoaded', () => {
             // Mobile menu toggle
@@ -279,6 +385,7 @@
                 btn.addEventListener('click', () => {
                     const category = btn.dataset.category;
                     
+                    // Update button styles
                     filterBtns.forEach(b => {
                         b.classList.remove('active', 'text-gray-900', 'border-b-2', 'border-gray-900');
                         b.classList.add('text-gray-500');
@@ -286,7 +393,8 @@
                     btn.classList.add('active', 'text-gray-900', 'border-b-2', 'border-gray-900');
                     btn.classList.remove('text-gray-500');
                     
-                    // Filter logic would go here
+                    // Filter photos
+                    filterPhotos(category);
                 });
             });
 
@@ -305,233 +413,8 @@
                 });
             });
 
-        // Initialize map when page loads
-            
-            try {
-                console.log("CONFIG.mapboxToken:", CONFIG.mapboxToken);
-                console.log("mapboxgl available:", typeof mapboxgl !== "undefined");
-                mapboxgl.accessToken = CONFIG.mapboxToken;
-                // Fallback: set token directly if CONFIG fails
-                if (!mapboxgl.accessToken) {
-                    mapboxgl.accessToken = "pk.eyJ1Ijoiam1qYWNvYnMiLCJhIjoiY21kdDlqdzRhMDU5MTJucTNreGgxbTdiNSJ9.kLIM9gpvIJ4yTScDBietxQ";
-                }
-                
-                const map = new mapboxgl.Map({
-                    container: "map",
-                    style: "mapbox://styles/mapbox/light-v11",
-                    center: [-122.4194, 37.7749],
-                    zoom: 10
-                });
-                
-                });
-            } catch (error) {
-                console.error("Map initialization error:", error);
-            }
-        }
-        
-        // Call initializeMap after photos are loaded
-        
+            // Load photos and initialize everything
             loadPhotos();
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-
-            // Clean Leaflet map initialization
-            function initMap() {
-                if (typeof L === "undefined") {
-                    console.error("Leaflet not loaded");
-                    return;
-                }
-                
-                try {
-                    const map = L.map("map").setView([37.7749, -122.4194], 11);
-                    
-                    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                        attribution: "© OpenStreetMap contributors"
-                    }).addTo(map);
-                    
-                    const markers = [
-                        { lat: 37.8199, lng: -122.4783, title: "Golden Gate Portrait", location: "Golden Gate Bridge" },
-                        { lat: 37.7599, lng: -122.4148, title: "Mission Street", location: "Mission District" },
-                        { lat: 37.8974, lng: -122.5808, title: "Nature Photo", location: "Muir Woods" }
-                    ];
-                    
-                    markers.forEach(function(marker) {
-                        L.marker([marker.lat, marker.lng])
-                            .addTo(map)
-                            .bindPopup("<strong>" + marker.title + "</strong><br>" + marker.location);
-                    });
-                    
-                    console.log("Map initialized successfully");
-                    
-                } catch (error) {
-                    console.error("Map error:", error);
-                }
-            }
-            
-            // Initialize map after a delay
-            setTimeout(initMap, 2000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-
-// Simple Leaflet map initialization
-}
-
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
         });
     </script>
 </body>
