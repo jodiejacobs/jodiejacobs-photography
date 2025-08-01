@@ -1,0 +1,15 @@
+{
+  "nextcloud_url": "https://your-nextcloud.com/remote.php/dav/files/username/",
+  "username": "your-username",
+  "password": "your-app-password",
+  "photo_directories": {
+    "faces": "Photos/Portfolio/Faces",
+    "street": "Photos/Portfolio/Street",
+    "nature": "Photos/Portfolio/Nature"
+  },
+  "public_shares": {
+    "faces": "https://your-nextcloud.com/s/FACES_SHARE_TOKEN",
+    "street": "https://your-nextcloud.com/s/STREET_SHARE_TOKEN",
+    "nature": "https://your-nextcloud.com/s/NATURE_SHARE_TOKEN"
+  }
+}

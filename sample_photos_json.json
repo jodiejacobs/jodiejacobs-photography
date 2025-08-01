@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "title": "Street Portrait Downtown",
+    "category": "faces",
+    "thumbnail": "https://your-nextcloud.com/s/FACES_TOKEN/download/portrait1.jpg",
+    "full": "https://your-nextcloud.com/s/FACES_TOKEN/download/portrait1.jpg",
+    "lat": 37.7749,
+    "lng": -122.4194,
+    "location": "San Francisco, CA",
+    "date": "2024-12-15",
+    "filename": "portrait1.jpg"
+  },
+  {
+    "id": 2,
+    "title": "Morning Light",
+    "category": "street",
+    "thumbnail": "https://your-nextcloud.com/s/STREET_TOKEN/download/morning.jpg",
+    "full": "https://your-nextcloud.com/s/STREET_TOKEN/download/morning.jpg", 
+    "lat": 37.7849,
+    "lng": -122.4094,
+    "location": "Mission District, SF",
+    "date": "2024-12-10",
+    "filename": "morning.jpg"
+  },
+  {
+    "id": 3,
+    "title": "Golden Gate Sunset",
+    "category": "nature",
+    "thumbnail": "https://your-nextcloud.com/s/NATURE_TOKEN/download/sunset.jpg",
+    "full": "https://your-nextcloud.com/s/NATURE_TOKEN/download/sunset.jpg",
+    "lat": 37.8199,
+    "lng": -122.4783,
+    "location": "Golden Gate Bridge",
+    "date": "2024-12-08",
+    "filename": "sunset.jpg"
+  }
+]

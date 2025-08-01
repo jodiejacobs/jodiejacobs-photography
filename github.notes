@@ -1,0 +1,22 @@
+# Update photos.json after running NextCloud indexer
+git add photos.json
+git commit -m "Update photo index with new photos"
+git push
+
+# Check deployment status
+gh api repos/:owner/:repo/pages/builds/latest
+
+# View live site
+gh browse
+
+# Clone to another machine
+gh repo clone jodiejacobs-photography
+
+# Download the NextCloud indexer script
+curl -o nextcloud_indexer.py https://raw.githubusercontent.com/your-repo/scripts/main/nextcloud_indexer.py
+
+# Make it executable
+chmod +x nextcloud_indexer.py
+
+# Create config
+python nextcloud_indexer.py --create-config

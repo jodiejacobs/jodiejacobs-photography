@@ -114,6 +114,23 @@
         </div>
     </section>
 
+    <!-- Map Section -->
+    <section id="map-section" class="py-16 px-6 bg-gray-50">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex justify-between items-start mb-12">
+                <div></div>
+                <div class="text-right">
+                    <h2 class="text-3xl font-light text-gray-900 mb-2">Photo Locations</h2>
+                    <p class="text-gray-600">Where these moments were captured</p>
+                </div>
+            </div>
+            
+            <div class="w-full h-96 bg-gray-200 rounded-lg overflow-hidden">
+                <div id="map" class="w-full h-full"></div>
+            </div>
+        </div>
+    </section>
+
     <!-- Contact Section -->
     <section id="contact" class="py-16 px-6">
         <div class="max-w-7xl mx-auto">
@@ -162,11 +179,30 @@
         </div>
     </footer>
 
+    <!-- Lightbox Modal -->
+    <div id="lightbox" class="hidden fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+        <div class="relative max-w-5xl w-full">
+            <button id="close-lightbox" class="absolute -top-12 right-0 text-white hover:text-gray-300">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+            <img id="lightbox-img" src="" alt="" class="w-full h-auto max-h-[85vh] object-contain">
+            <div id="lightbox-info" class="absolute bottom-4 left-4 text-white">
+                <h3 id="lightbox-title" class="font-medium mb-1"></h3>
+                <p id="lightbox-location" class="text-sm opacity-75"></p>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Configuration - Update these with your NextCloud details
         const CONFIG = {
+            // Your NextCloud base URL for publicly shared photos
             nextcloudBaseUrl: 'https://your-nextcloud-domain.com/s/',
+            // Path to your photos.json file (hosted on GitHub or NextCloud)
             photosJsonUrl: './photos.json',
+            // Mapbox access token (get free at mapbox.com)
             mapboxToken: 'pk.eyJ1Ijoiam1qYWNvYnMiLCJhIjoiY21kdDlqdzRhMDU5MTJucTNreGgxbTdiNSJ9.kLIM9gpvIJ4yTScDBietxQ'
         };
 
@@ -175,6 +211,8 @@
         let displayedPhotos = [];
         let currentPage = 0;
         const photosPerPage = 24;
+        let map = null;
+        let markers = [];
 
         // Load photos from JSON
         async function loadPhotos() {
@@ -187,11 +225,13 @@
                 document.getElementById('photo-grid').classList.remove('hidden');
                 
                 loadMorePhotos();
+                initializeMap();
             } catch (error) {
                 console.error('Error loading photos:', error);
                 document.getElementById('loading').innerHTML = `
                     <div class="text-center py-8 text-gray-500">
-                        <p>Ready for your photos! Upload photos.json to get started.</p>
+                        <p>Unable to load photos. Please check your photos.json file.</p>
+                        <p class="text-sm mt-2">See console for details.</p>
                     </div>
                 `;
             }
@@ -213,6 +253,7 @@
             
             currentPage++;
             
+            // Show/hide load more button
             if (endIndex >= displayedPhotos.length) {
                 loadMoreBtn.classList.add('hidden');
             } else {
@@ -225,12 +266,16 @@
             const div = document.createElement('div');
             div.className = 'photo-item opacity-0 transition-opacity duration-500';
             div.dataset.category = photo.category;
+            div.dataset.lat = photo.lat;
+            div.dataset.lng = photo.lng;
+            div.dataset.location = photo.location;
             
             div.innerHTML = `
                 <div class="aspect-[3/4] bg-gray-100 rounded-sm overflow-hidden cursor-pointer group">
                     <img src="${photo.thumbnail}" 
+                         data-full="${photo.full}"
                          alt="${photo.title}" 
-                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 lazy-image"
                          loading="lazy">
                 </div>
                 <div class="mt-2 text-right">
@@ -239,11 +284,123 @@
                 </div>
             `;
             
+            // Add click listener for lightbox
+            div.addEventListener('click', () => openLightbox(photo));
+            
+            // Fade in animation
             setTimeout(() => {
                 div.classList.remove('opacity-0');
             }, 100);
             
             return div;
+        }
+
+        // Category filtering
+        function filterPhotos(category) {
+            const grid = document.getElementById('photo-grid');
+            const loadMoreBtn = document.getElementById('load-more');
+            
+            // Clear current photos
+            grid.innerHTML = '';
+            currentPage = 0;
+            
+            // Filter photos
+            if (category === 'all') {
+                displayedPhotos = [...allPhotos];
+            } else {
+                displayedPhotos = allPhotos.filter(photo => photo.category === category);
+            }
+            
+            // Load first page
+            loadMorePhotos();
+        }
+
+        // Lightbox functionality
+        function openLightbox(photo) {
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            const lightboxTitle = document.getElementById('lightbox-title');
+            const lightboxLocation = document.getElementById('lightbox-location');
+            
+            lightboxImg.src = photo.full;
+            lightboxImg.alt = photo.title;
+            lightboxTitle.textContent = photo.title;
+            lightboxLocation.textContent = `${photo.location} • ${photo.date}`;
+            
+            lightbox.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Initialize map
+        function initializeMap() {
+            if (typeof mapboxgl === 'undefined' || !CONFIG.mapboxToken || CONFIG.mapboxToken.includes('example')) {
+                document.getElementById('map').innerHTML = `
+                    <div class="flex items-center justify-center h-full text-gray-500">
+                        <div class="text-center">
+                            <svg class="w-12 h-12 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                            </svg>
+                            <p class="text-sm">Map requires Mapbox token</p>
+                            <p class="text-xs mt-1">Get one free at mapbox.com</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                mapboxgl.accessToken = CONFIG.mapboxToken;
+                
+                map = new mapboxgl.Map({
+                    container: 'map',
+                    style: 'mapbox://styles/mapbox/light-v11',
+                    center: [-122.4194, 37.7749], // Default to San Francisco
+                    zoom: 10
+                });
+
+                // Add markers for photos with GPS data
+                allPhotos.forEach(photo => {
+                    if (photo.lat && photo.lng) {
+                        const marker = new mapboxgl.Marker({
+                            color: '#374151'
+                        })
+                        .setLngLat([photo.lng, photo.lat])
+                        .setPopup(
+                            new mapboxgl.Popup({ offset: 25 })
+                            .setHTML(`
+                                <div class="text-sm">
+                                    <img src="${photo.thumbnail}" alt="${photo.title}" class="w-20 h-16 object-cover mb-2 rounded">
+                                    <strong>${photo.title}</strong><br>
+                                    ${photo.location}<br>
+                                    <span class="text-gray-500">${photo.date}</span>
+                                </div>
+                            `)
+                        )
+                        .addTo(map);
+                        
+                        markers.push(marker);
+                    }
+                });
+
+                // Fit map to show all markers
+                if (markers.length > 0) {
+                    const bounds = new mapboxgl.LngLatBounds();
+                    allPhotos.forEach(photo => {
+                        if (photo.lat && photo.lng) {
+                            bounds.extend([photo.lng, photo.lat]);
+                        }
+                    });
+                    map.fitBounds(bounds, { padding: 50 });
+                }
+
+            } catch (error) {
+                console.error('Map initialization error:', error);
+            }
         }
 
         // Event listeners
@@ -262,6 +419,7 @@
                 btn.addEventListener('click', () => {
                     const category = btn.dataset.category;
                     
+                    // Update active filter
                     filterBtns.forEach(b => {
                         b.classList.remove('active', 'text-gray-900', 'border-b-2', 'border-gray-900');
                         b.classList.add('text-gray-500');
@@ -269,12 +427,21 @@
                     btn.classList.add('active', 'text-gray-900', 'border-b-2', 'border-gray-900');
                     btn.classList.remove('text-gray-500');
                     
-                    // Filter logic would go here
+                    filterPhotos(category);
                 });
             });
 
             // Load more button
             document.getElementById('load-more').addEventListener('click', loadMorePhotos);
+
+            // Lightbox controls
+            document.getElementById('close-lightbox').addEventListener('click', closeLightbox);
+            document.getElementById('lightbox').addEventListener('click', (e) => {
+                if (e.target.id === 'lightbox') closeLightbox();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeLightbox();
+            });
 
             // Smooth scrolling
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -288,6 +455,7 @@
                 });
             });
 
+            // Load photos
             loadPhotos();
         });
     </script>

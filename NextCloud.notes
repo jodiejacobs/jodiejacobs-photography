@@ -1,0 +1,7 @@
+Create Public Shares in NextCloud:
+
+Go to your NextCloud web interface
+Navigate to your photo folders (e.g., Photos/Portfolio/Faces)
+Click the share icon → Create public share
+Copy the share URL (looks like https://your-nextcloud.com/s/ABC123)
+Repeat for each category (faces, street, nature)
