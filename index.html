@@ -6,8 +6,8 @@
     <title>Jodie Jacobs Photography</title>
     <meta name="description" content="Photography portfolio by Jodie Jacobs featuring faces, street, and nature photography.">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mapbox-gl/2.15.0/mapbox-gl.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/mapbox-gl/2.15.0/mapbox-gl.min.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
@@ -375,6 +375,16 @@
         setTimeout(initializeMap, 1000);
         
             loadPhotos();
+            
+            // Initialize map after photos are loaded
+            setTimeout(() => {
+                initializeMap();
+            }, 1000);
+            
+            // Initialize map after photos are loaded
+            setTimeout(() => {
+                initializeMap();
+            }, 1000);
             
             // Initialize map after photos are loaded
             setTimeout(() => {
