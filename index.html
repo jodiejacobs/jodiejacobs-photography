@@ -192,65 +192,9 @@
         const photosPerPage = 24;
         let map = null;
 
-        // Sample photos for demo (remove when using real photos.json)
-        const samplePhotos = [
-            {
-                id: 1,
-                title: "Golden Hour Portrait",
-                category: "faces",
-                location: "Golden Gate Bridge",
-                date: "2024-12-15",
-                thumbnail: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=600&fit=crop",
-                coordinates: { lat: 37.8199, lng: -122.4783 }
-            },
-            {
-                id: 2,
-                title: "Street Market",
-                category: "street",
-                location: "Mission District",
-                date: "2024-12-10",
-                thumbnail: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=600&fit=crop",
-                coordinates: { lat: 37.7599, lng: -122.4148 }
-            },
-            {
-                id: 3,
-                title: "Redwood Giants",
-                category: "nature",
-                location: "Muir Woods",
-                date: "2024-12-08",
-                thumbnail: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=600&fit=crop",
-                coordinates: { lat: 37.8974, lng: -122.5808 }
-            },
-            {
-                id: 4,
-                title: "Evening Light",
-                category: "faces",
-                location: "Dolores Park",
-                date: "2024-12-05",
-                thumbnail: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=600&fit=crop",
-                coordinates: { lat: 37.7596, lng: -122.4269 }
-            },
-            {
-                id: 5,
-                title: "City Rhythm",
-                category: "street",
-                location: "Union Square",
-                date: "2024-12-03",
-                thumbnail: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=600&fit=crop",
-                coordinates: { lat: 37.7880, lng: -122.4074 }
-            },
-            {
-                id: 6,
-                title: "Ocean Mist",
-                category: "nature",
-                location: "Baker Beach",
-                date: "2024-12-01",
-                thumbnail: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=600&fit=crop",
-                coordinates: { lat: 37.7937, lng: -122.4844 }
-            }
-        ];
 
-        // Load photos from JSON or use sample data
+
+        // Load photos from JSON
         async function loadPhotos() {
             try {
                 const response = await fetch(CONFIG.photosJsonUrl);
@@ -260,8 +204,13 @@
                     throw new Error('Photos JSON not found');
                 }
             } catch (error) {
-                console.log('Using sample photos for demo');
-                allPhotos = samplePhotos;
+                console.error('Error loading photos:', error);
+                document.getElementById('loading').innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <p>Could not load photos. Please ensure photos.json exists in the same directory.</p>
+                    </div>
+                `;
+                return;
             }
             
             displayedPhotos = [...allPhotos];
