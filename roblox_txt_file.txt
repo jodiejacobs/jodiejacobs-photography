@@ -1,0 +1,11 @@
+# robots.txt file for jodiejacobs.com
+# This file tells web crawlers which pages they can and cannot access
+
+User-agent: *
+Allow: /
+
+# Allow all search engines to crawl the entire site
+# This helps with SEO for your photography portfolio
+
+# Sitemap location (optional - create if you have one)
+# Sitemap: https://jodiejacobs.com/sitemap.xml
