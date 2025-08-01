@@ -330,7 +330,7 @@
                         .setLngLat([photo.lng, photo.lat])
                         .setPopup(
                             new mapboxgl.Popup({ offset: 25 })
-                            .setHTML(`<div class="text-sm"><strong>${photo.title}</strong><br>${photo.location}</div>`)
+                            .setHTML("<div class="text-sm"><strong>" + photo.title + "</strong><br>" + photo.location + "</div>")
                         )
                         .addTo(map);
                     }
@@ -344,6 +344,51 @@
         setTimeout(initializeMap, 1000);
         
             loadPhotos();
+            
+            // Initialize map after photos are loaded
+            setTimeout(() => {
+                initializeMap();
+            }, 1000);
+            
+            // Initialize map after photos are loaded
+            setTimeout(() => {
+                initializeMap();
+            }, 1000);
+            
+            // Initialize map after photos are loaded
+            setTimeout(() => {
+                initializeMap();
+            }, 1000);
+            
+            // Initialize map after photos are loaded
+            setTimeout(() => {
+                initializeMap();
+            }, 1000);
+            
+            // Initialize map after photos are loaded
+            setTimeout(() => {
+                initializeMap();
+            }, 1000);
+            
+            // Initialize map after photos are loaded
+            setTimeout(() => {
+                initializeMap();
+            }, 1000);
+            
+            // Initialize map after photos are loaded
+            setTimeout(() => {
+                initializeMap();
+            }, 1000);
+            
+            // Initialize map after photos are loaded
+            setTimeout(() => {
+                initializeMap();
+            }, 1000);
+            
+            // Initialize map after photos are loaded
+            setTimeout(() => {
+                initializeMap();
+            }, 1000);
             
             // Initialize map after photos are loaded
             setTimeout(() => {
