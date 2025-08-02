@@ -124,11 +124,11 @@ scan_portfolio() {
             --argjson id "$photo_id" \
             --arg title "$title" \
             --arg category "$category" \
-            --arg thumbnail "$BASE_URL/$filename" \
-            --arg full "$BASE_URL/$filename" \
+            --arg thumbnail "$BASE_URL/$(basename "$filename" | sed 's/ /./g')" \
+            --arg full "$BASE_URL/$(basename "$filename" | sed 's/ /./g')" \
             --arg location "Unknown" \
             --arg date "$date" \
-            --arg filename "$filename" \
+            --arg filename "$(basename "$filename" | sed 's/ /./g')" \
             --arg original_file "$filename" \
             '{
                 id: $id,
