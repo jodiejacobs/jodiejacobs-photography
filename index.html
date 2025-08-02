@@ -57,8 +57,6 @@
             <div class="flex justify-between items-start mb-12">
                 <div></div>
                 <div class="text-right">
-                    <!-- <h2 class="text-3xl font-light text-gray-900 mb-6">Portfolio</h2> -->
-                    
                     <!-- Category Filters -->
                     <div class="flex justify-end space-x-6 mb-8">
                         <button class="filter-btn active text-sm text-gray-900 border-b-2 border-gray-900 pb-1" data-category="all">
@@ -103,8 +101,7 @@
             <div class="flex justify-between items-start mb-12">
                 <div></div>
                 <div class="text-right">
-                    <!-- <h2 class="text-3xl font-light text-gray-900 mb-2">Photo Locations</h2> -->
-                    <!-- <p class="text-gray-600">Where these moments were captured</p> -->
+                    <!-- Map title can go here if needed -->
                 </div>
             </div>
             
@@ -220,6 +217,7 @@
         let currentPage = 0;
         const photosPerPage = 24;
         let map = null;
+        let mapInitialized = false; // Prevent multiple initializations
 
         // Lightbox functionality
         class PhotoLightbox {
@@ -354,14 +352,43 @@
                 const response = await fetch(CONFIG.photosJsonUrl);
                 if (response.ok) {
                     allPhotos = await response.json();
+                    console.log('Loaded photos:', allPhotos.length);
+                    
+                    // Validate that photos have valid URLs
+                    const validPhotos = allPhotos.filter(photo => {
+                        const hasValidUrl = photo.thumbnail && photo.full;
+                        if (!hasValidUrl) {
+                            console.warn('Photo missing URLs:', photo);
+                        }
+                        return hasValidUrl;
+                    });
+                    
+                    if (validPhotos.length !== allPhotos.length) {
+                        console.warn(`${allPhotos.length - validPhotos.length} photos have invalid URLs`);
+                    }
+                    
+                    allPhotos = validPhotos;
+                    
                 } else {
-                    throw new Error('Photos JSON not found');
+                    throw new Error(`Photos JSON not found (${response.status})`);
                 }
             } catch (error) {
                 console.error('Error loading photos:', error);
                 document.getElementById('loading').innerHTML = `
                     <div class="text-center py-8 text-gray-500">
-                        <p>Could not load photos. Please ensure photos.json exists in the same directory.</p>
+                        <p>Could not load photos from GitHub Releases.</p>
+                        <p class="text-sm mt-2">Error: ${error.message}</p>
+                        <p class="text-xs mt-2">Make sure photos.json exists and GitHub Releases are properly configured.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            if (allPhotos.length === 0) {
+                document.getElementById('loading').innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <p>No photos found.</p>
+                        <p class="text-sm mt-2">Please upload photos to GitHub Releases and update photos.json</p>
                     </div>
                 `;
                 return;
@@ -373,7 +400,11 @@
             document.getElementById('photo-grid').classList.remove('hidden');
             
             loadMorePhotos();
-            initializeMap();
+            
+            // Initialize map only once, after photos are loaded
+            if (!mapInitialized) {
+                initializeMap();
+            }
         }
 
         // Load more photos (pagination)
@@ -412,7 +443,8 @@
                     <img src="${photo.thumbnail}" 
                          alt="${photo.title}" 
                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                         loading="lazy">
+                         loading="lazy"
+                         onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDMwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMjUgMTgwSDEzNVYxOTBIMTI1VjE4MFoiIGZpbGw9IiM5Q0EzQUYiLz4KPHBhdGggZD0iTTE2NSAxODBIMTc1VjE5MEgxNjVWMTgwWiIgZmlsbD0iIzlDQTNBRiIvPgo8cGF0aCBkPSJNMTI1IDIwMEgxNzVWMjEwSDEyNVYyMDBaIiBmaWxsPSIjOUNBM0FGIi8+CjwvdGV2Zz4K'; this.parentElement.style.backgroundColor='#f3f4f6'; this.parentElement.innerHTML='<div class=\"flex items-center justify-center h-full text-gray-400 text-sm\">Image not found<br><span class=\"text-xs\">' + '${photo.title}' + '</span></div>';">
                 </div>
                 <div class="mt-2 text-right">
                     <h3 class="text-sm font-medium text-gray-900">${photo.title}</h3>
@@ -451,6 +483,11 @@
 
         // Initialize Leaflet map
         function initializeMap() {
+            if (mapInitialized) {
+                console.log('Map already initialized, skipping...');
+                return;
+            }
+            
             if (typeof L === "undefined") {
                 console.error("Leaflet not loaded");
                 return;
@@ -459,11 +496,14 @@
             try {
                 // Initialize map centered on San Francisco
                 map = L.map("map-container").setView([37.7749, -122.4194], 11);
+                mapInitialized = true;
                 
                 // Add OpenStreetMap tiles
                 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
                     attribution: "© OpenStreetMap contributors"
                 }).addTo(map);
+                
+                let markersAdded = 0;
                 
                 // Add markers for photo locations
                 allPhotos.forEach(photo => {
@@ -471,11 +511,11 @@
                     if ((photo.lat && photo.lng) || (photo.coordinates)) {
                         let lat, lng;
                         
-                        if (photo.lat && photo.lng) {
+                        if (photo.lat && photo.lng && photo.lat !== null && photo.lng !== null) {
                             // Direct lat/lng properties
                             lat = photo.lat;
                             lng = photo.lng;
-                        } else if (photo.coordinates) {
+                        } else if (photo.coordinates && photo.coordinates.lat && photo.coordinates.lng) {
                             // Nested coordinates object
                             lat = photo.coordinates.lat;
                             lng = photo.coordinates.lng;
@@ -486,6 +526,7 @@
                                 .addTo(map)
                                 .bindPopup(`<strong>${photo.title}</strong><br>${photo.location}`);
                             
+                            markersAdded++;
                             console.log(`Added marker for ${photo.title} at ${lat}, ${lng}`);
                         }
                     } else {
@@ -493,10 +534,18 @@
                     }
                 });
                 
-                console.log("Map initialized successfully with", allPhotos.length, "photos");
+                console.log(`Map initialized successfully with ${markersAdded} markers out of ${allPhotos.length} photos`);
                 
             } catch (error) {
                 console.error("Map initialization error:", error);
+                document.getElementById('map-container').innerHTML = `
+                    <div class="flex items-center justify-center h-full text-gray-500">
+                        <div class="text-center">
+                            <p class="text-sm">Map failed to load</p>
+                            <p class="text-xs mt-1">${error.message}</p>
+                        </div>
+                    </div>
+                `;
             }
         }
 
@@ -546,46 +595,6 @@
 
             // Load photos and initialize everything
             loadPhotos();
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
-            
-            // Initialize map after photos are loaded
-            setTimeout(() => {
-                initializeMap();
-            }, 1000);
         });
     </script>
 </body>
