@@ -1,15 +1,15 @@
 [
   {
     "id": 1,
-    "title": "Dscf2561",
+    "title": "DSCF2561",
     "category": "street",
-    "thumbnail": "portfolio/street_001_dscf2561.jpg",
-    "full": "portfolio/street_001_dscf2561.jpg",
+    "thumbnail": "https://github.com/jodiejacobs/jodiejacobs-photography/releases/download/v1.0.0/street_001_dscf2561.jpg",
+    "full": "https://github.com/jodiejacobs/jodiejacobs-photography/releases/download/v1.0.0/street_001_dscf2561.jpg",
     "lat": null,
     "lng": null,
     "location": "Unknown",
-    "date": "2025-04-11",
+    "date": "2025-08-01",
     "filename": "street_001_dscf2561.jpg",
-    "original_file": "DSCF2561.jpg"
+    "original_file": "street_001_dscf2561.jpg"
   }
 ]
