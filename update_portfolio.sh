@@ -8,7 +8,7 @@ set -e  # Exit on any error
 GITHUB_USER="jodiejacobs"
 REPO_NAME="jodiejacobs-photography"
 RELEASE_TAG="v1.0.0"
-PORTFOLIO_DIR="portfolio"
+PORTFOLIO_DIR="photos"
 PHOTOS_JSON="photos.json"
 BASE_URL="https://github.com/$GITHUB_USER/$REPO_NAME/releases/download/$RELEASE_TAG"
 
