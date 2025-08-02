@@ -1,1 +1,15 @@
-[]
+[
+  {
+    "id": 1,
+    "title": "Dscf2561",
+    "category": "street",
+    "thumbnail": "./photos/thumbnails/street_001_dscf2561_thumb.jpg",
+    "full": "./photos/full/street_001_dscf2561.jpg",
+    "lat": null,
+    "lng": null,
+    "location": "Unknown",
+    "date": "2025-04-11",
+    "filename": "street_001_dscf2561.jpg",
+    "original_file": "DSCF2561.jpg"
+  }
+]
