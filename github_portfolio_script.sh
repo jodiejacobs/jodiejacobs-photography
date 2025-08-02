@@ -108,8 +108,7 @@ scan_portfolio() {
     local photos_array="[]"
     
     # Find all image files
-    shopt -s nullglob  # Handle case where no files match
-    for img in "$PORTFOLIO_DIR"/*.jpg "$PORTFOLIO_DIR"/*.jpeg "$PORTFOLIO_DIR"/*.png "$PORTFOLIO_DIR"/*.JPG "$PORTFOLIO_DIR"/*.JPEG "$PORTFOLIO_DIR"/*.PNG; do
+    for img in "$PORTFOLIO_DIR"/*.{jpg,jpeg,png,JPG,JPEG,PNG} 2>/dev/null; do
         # Skip if no files match
         [[ ! -f "$img" ]] && continue
         
@@ -177,8 +176,7 @@ manage_release() {
     
     # Find all image files
     local image_files=()
-    shopt -s nullglob  # Handle case where no files match
-    for img in "$PORTFOLIO_DIR"/*.jpg "$PORTFOLIO_DIR"/*.jpeg "$PORTFOLIO_DIR"/*.png "$PORTFOLIO_DIR"/*.JPG "$PORTFOLIO_DIR"/*.JPEG "$PORTFOLIO_DIR"/*.PNG; do
+    for img in "$PORTFOLIO_DIR"/*.{jpg,jpeg,png,JPG,JPEG,PNG} 2>/dev/null; do
         [[ -f "$img" ]] && image_files+=("$img")
     done
     
@@ -267,8 +265,7 @@ show_status() {
     
     # Count files in portfolio
     local file_count=0
-    shopt -s nullglob  # Handle case where no files match
-    for img in "$PORTFOLIO_DIR"/*.jpg "$PORTFOLIO_DIR"/*.jpeg "$PORTFOLIO_DIR"/*.png "$PORTFOLIO_DIR"/*.JPG "$PORTFOLIO_DIR"/*.JPEG "$PORTFOLIO_DIR"/*.PNG; do
+    for img in "$PORTFOLIO_DIR"/*.{jpg,jpeg,png,JPG,JPEG,PNG} 2>/dev/null; do
         [[ -f "$img" ]] && ((file_count++))
     done
     
